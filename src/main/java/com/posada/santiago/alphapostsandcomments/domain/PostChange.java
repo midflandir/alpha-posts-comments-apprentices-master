@@ -16,10 +16,11 @@ public class PostChange extends EventChange {
 
     public PostChange(Post post){
         apply((PostCreated event)-> {
+
             post.title = new Title(event.getTitle());
             post.author = new Author(event.getAuthor());
-            post.comments = new ArrayList<>();
-        });
+            post.comments = new ArrayList<>();}
+        );
 
         apply((CommentAdded event)-> {
             Comment comment =

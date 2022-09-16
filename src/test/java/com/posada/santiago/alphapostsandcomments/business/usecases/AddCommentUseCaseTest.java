@@ -22,7 +22,6 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 class AddCommentUseCaseTest {
 
-
     @Mock
     private EventBus eventBus;
     @Mock
