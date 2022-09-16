@@ -11,10 +11,11 @@ import com.posada.santiago.alphapostsandcomments.domain.values.CommentId;
 import com.posada.santiago.alphapostsandcomments.domain.values.Content;
 import com.posada.santiago.alphapostsandcomments.domain.values.Font;
 import com.posada.santiago.alphapostsandcomments.domain.values.PostId;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Component
 public class AddCommentUseCase extends UseCaseForCommand<AddCommentCommand> {
 
@@ -37,11 +38,12 @@ public class AddCommentUseCase extends UseCaseForCommand<AddCommentCommand> {
                             new Author(command.getAuthor()),
                             new Content(command.getContent()),
                             new Font(command.getFont()));
+                    log.info(" Congratulations, Comment is being added, looks like everything is working fine so far ");
                     return post.getUncommittedChanges();
                 }).map(event -> {
                     bus.publish(event);
                     return event;
                 }).flatMap(event -> repository.saveEvent(event))
-        );
+        ).doOnError(error -> log.error("Error - Comment couldn't be created." + error));
     }
 }

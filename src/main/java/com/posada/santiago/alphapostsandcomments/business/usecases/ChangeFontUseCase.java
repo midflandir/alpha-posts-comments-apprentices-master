@@ -9,9 +9,11 @@ import com.posada.santiago.alphapostsandcomments.domain.commands.ChangeFontComma
 import com.posada.santiago.alphapostsandcomments.domain.values.CommentId;
 import com.posada.santiago.alphapostsandcomments.domain.values.Font;
 import com.posada.santiago.alphapostsandcomments.domain.values.PostId;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+@Slf4j
 @Component
 public class ChangeFontUseCase extends UseCaseForCommand<ChangeFontCommand> {
     private final DomainEventRepository repository;
@@ -30,7 +32,9 @@ public class ChangeFontUseCase extends UseCaseForCommand<ChangeFontCommand> {
                         .flatMapIterable(domainEvents -> {
                                 Post post = Post.from(PostId.of(command.getPostId()), domainEvents);
                                 post.Changefont(CommentId.of(command.getCommentId()), new Font(command.getFont()));
-                              return  post.getUncommittedChanges();
-                        }).flatMap(event -> repository.saveEvent(event))).doOnNext(bus::publish);
+                            log.info(" Congratulations, Comment is being added, looks like everything is working fine so far ");
+                            return  post.getUncommittedChanges();
+                        }).flatMap(event -> repository.saveEvent(event))).doOnNext(bus::publish)
+                .doOnError(error -> log.error("Error - Font couldn't be change." + error));
     }
 }

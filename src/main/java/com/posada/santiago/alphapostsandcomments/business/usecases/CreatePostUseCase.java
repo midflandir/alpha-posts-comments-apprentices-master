@@ -9,10 +9,11 @@ import com.posada.santiago.alphapostsandcomments.domain.commands.CreatePostComma
 import com.posada.santiago.alphapostsandcomments.domain.values.Author;
 import com.posada.santiago.alphapostsandcomments.domain.values.PostId;
 import com.posada.santiago.alphapostsandcomments.domain.values.Title;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Component
 public class CreatePostUseCase extends UseCaseForCommand<CreatePostCommand> {
     private final DomainEventRepository repository;
@@ -27,8 +28,10 @@ public class CreatePostUseCase extends UseCaseForCommand<CreatePostCommand> {
     public Flux<DomainEvent> apply(Mono<CreatePostCommand> createPostCommandMono) {
         return createPostCommandMono.flatMapIterable(command -> {
             Post post = new Post(PostId.of(command.getPostId()), new Title(command.getTitle()), new Author(command.getAuthor()));
+            log.info(" Congratulations, Post is now being created, looks like everything is working fine so far ");
             return post.getUncommittedChanges();
         }).flatMap(event ->
-                repository.saveEvent(event).thenReturn(event)).doOnNext(bus::publish);
+                repository.saveEvent(event).thenReturn(event)).doOnNext(bus::publish)
+                .doOnError(error -> log.error("Error - Post couldn't be created." + error));
     }
 }
